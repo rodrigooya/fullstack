@@ -4,7 +4,16 @@ const Button = ({ onClick, text }) => (
     <button onClick={onClick}>
       {text}
     </button>
-  )
+)
+
+const Anecdote = ({ selected, points, anecdotes }) => (
+  <div>
+      <p>{anecdotes[selected]}</p>
+      <p>has {points[selected]} votes</p>
+  </div>
+ 
+)
+
 
 const App = () => { 
   const anecdotes = [
@@ -17,18 +26,28 @@ const App = () => {
     'Programming without an extremely heavy use of console.log is same as if a doctor would refuse to use x-rays or blood tests when diagnosing patients.',
     'The only way to go fast, is to go well.'
   ]
-  const [selected, setSelected] = useState(0)
+  const [selected, setSelected] = useState(0);
+  const [points, setPoints] = useState(Array(anecdotes.length).fill(0))
   
   const handleSelectedClick = () => {
-    console.log(anecdotes)
-    setSelected(Math.floor(Math.random() * anecdotes.length))
-    
+    setSelected(Math.floor(Math.random() * anecdotes.length))  
+  }
+
+  const handleVoteClick = () => { 
+    const copy = [...points]
+    copy[selected] += 1
+    setPoints(copy)
   }
 
   return (
     <div>
-      <p>{anecdotes[selected]}</p>
-      <Button onClick={handleSelectedClick} text='next anecdote' />
+        <h1>Anecdote of the day</h1>
+        <Anecdote selected={selected} anecdotes={anecdotes} points={points}/>
+        <Button onClick={handleVoteClick} text='vote' />
+        <Button onClick={handleSelectedClick} text='next anecdote' />
+        
+        <h1>Anecdote with most votes</h1>
+        <Anecdote selected={[points.indexOf(Math.max(...points))]} anecdotes={anecdotes} points={points}/>
     </div>
   )
 }
