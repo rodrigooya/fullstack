@@ -6,9 +6,12 @@ const Button = ({ onClick, text }) => (
   </button>
 )
 
-const StatisticsLine = (props) => {
-  return(    
-    <td>{props.value}</td>
+const StatisticsLine = ({value, text}) => {
+  return(
+    <tr>
+      <td>{text}</td> 
+      <td>{value}</td>
+    </tr>     
   )
 }
 const Statistics = (props) => {
@@ -26,30 +29,12 @@ const Statistics = (props) => {
       <h1>statistics</h1>
       <table>
         <tbody>
-          <tr>
-            <td>good</td>
-            <StatisticsLine text="good" value={props.good}/>
-          </tr>
-          <tr>
-            <td>neutral</td>
-            <StatisticsLine text="neutral" value={props.neutral}/>
-          </tr>
-          <tr>
-            <td>bad</td>
-            <StatisticsLine text="bad" value={props.bad}/>
-          </tr>
-          <tr>
-            <td>all</td>
-            <td>{props.allClicks.length}</td>
-          </tr>
-          <tr>
-            <td>average</td>
-            <td>{props.allClicks.reduce((a, b) => a + b, 0)/(props.allClicks.length)}</td>
-          </tr>
-          <tr>  
-            <td>positive</td>
-            <td>{((props.good)/(props.allClicks.length))*100} %</td>
-          </tr>
+            <StatisticsLine text="good" value={props.clicks.good}/>
+            <StatisticsLine text="neutral" value={props.clicks.neutral}/>       
+            <StatisticsLine text="bad" value={props.clicks.bad}/>
+            <StatisticsLine text="all" value={props.allClicks.length}/>
+            <StatisticsLine text="average" value={props.allClicks.reduce((a, b) => a + b, 0)/(props.allClicks.length)}/>
+            <StatisticsLine text="positive" value={`${((props.clicks.good)/(props.allClicks.length))*100} %`} />
         </tbody>
       </table>
     </div>
@@ -58,35 +43,33 @@ const Statistics = (props) => {
 
 const App = () => {
   // guarda los clics de cada botón en su propio estado
-  const [good, setGood] = useState(0)
-  const [neutral, setNeutral] = useState(0)
-  const [bad, setBad] = useState(0)
+  const [clicks, setClicks] = useState({
+    good: 0, neutral: 0, bad:0
+  })
   const [allClicks, setAll] = useState([])
 
   const handleGoodClick = () => {
     setAll(allClicks.concat(1))
-    setGood(good + 1)
+    setClicks({ ...clicks, good: clicks.good + 1 })
   }
 
   const handleNeutralClick = () => {
     setAll(allClicks.concat(0))
-    setNeutral(neutral + 1)
+    setClicks({ ...clicks, neutral: clicks.neutral + 1 })
   }
 
   const handleBadClick = () => {
     setAll(allClicks.concat(-1))
-    setBad(bad + 1)
+    setClicks({ ...clicks, bad: clicks.bad + 1 })
   }
 
   return (
     <div>
       <h1>give feedback</h1>
-     
-
       <Button onClick={handleGoodClick} text='good' />
       <Button onClick={handleNeutralClick} text='neutral' />
       <Button onClick={handleBadClick} text='bad' />   
-      <Statistics allClicks={allClicks} good={good} neutral={neutral} bad={bad}/>
+      <Statistics allClicks={allClicks} clicks={clicks}/>
     </div>
   )
 }
