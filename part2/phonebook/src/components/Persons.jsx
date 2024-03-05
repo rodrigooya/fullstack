@@ -7,7 +7,7 @@ const Persons = ({ persons, setPersons }) => {
     </button>
   )
   const handleDeleteClick = () => {
-    console.log(`Button ${persons.id} click`);
+   
     if (window.confirm(`Delete ${persons.name} ?`)){
       window.open("exit.html", "Thanks for Visiting!");
       personService      

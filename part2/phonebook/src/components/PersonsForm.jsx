@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import personService from '../services/persons'
 
-const PersonsForm = ({persons, setPersons}) => {
+const PersonsForm = ({persons, setPersons,setAddMessage, setValue}) => {
   
     const [ newName, setNewName ] = useState('')
     const [ newNumber, setNewNumber ] = useState('')
@@ -26,7 +26,22 @@ const PersonsForm = ({persons, setPersons}) => {
                 setNewName('')
                 setNewNumber('')
               })
-          }
+              .catch( error => {
+                setValue(true)
+                setAddMessage(          
+                  `Information of '${newName}' has already removed from server`        
+                  )          
+                setTimeout(() => {          
+                  setAddMessage(null)        
+                }, 5000)        
+              })
+            }
+            setValue(false)
+            setAddMessage(`Added '${newName}' `) 
+            setTimeout(() => {          
+              setAddMessage(null)        
+            }, 5000)
+          
         }else{
           personService      
           .create(personsObject)      
@@ -35,6 +50,12 @@ const PersonsForm = ({persons, setPersons}) => {
             setNewName('')
             setNewNumber('')
           })
+          
+            setValue(false)
+            setAddMessage(`Added '${newName}' `) 
+            setTimeout(() => {          
+            setAddMessage(null)        
+          }, 5000)
     }}
   
     const handleNameChange = (event) => {    
