@@ -29,7 +29,7 @@ const PersonsForm = ({persons, setPersons,setAddMessage, setValue}) => {
               .catch( error => {
                 setValue(true)
                 setAddMessage(          
-                  `Information of '${newName}' has already removed from server`        
+                  `${error}`        
                   )          
                 setTimeout(() => {          
                   setAddMessage(null)        
@@ -50,7 +50,16 @@ const PersonsForm = ({persons, setPersons,setAddMessage, setValue}) => {
             setNewName('')
             setNewNumber('')
           })
-          
+          .catch( error => {
+            setValue(true)
+            setAddMessage(          
+              `${error.response.data.error}`        
+              )          
+            setTimeout(() => {          
+              setAddMessage(null)        
+            }, 5000)
+            console.log(error.response.data.error)      
+          })
             setValue(false)
             setAddMessage(`Added '${newName}' `) 
             setTimeout(() => {          
