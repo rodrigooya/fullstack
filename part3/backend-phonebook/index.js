@@ -8,8 +8,8 @@ app.use(express.static('dist'))
 
 const morgan = require('morgan')
 
-morgan.token('body', (req, res) => JSON.stringify(req.body));
-app.use(morgan(':method :url :status :response-time ms - :res[content-length] :body - :req[content-length]'));
+morgan.token('body', (req) => JSON.stringify(req.body))
+app.use(morgan(':method :url :status :response-time ms - :res[content-length] :body - :req[content-length]'))
 
 const errorHandler = (error, request, response, next) => {
   console.error(error.message)
@@ -37,7 +37,6 @@ app.get('/info', (req, res) => {
   Person.find({}).then(persons => {
     res.send('<p>Phonebook has info for ' + persons.length + ' people</p><p>'+ date + '</p>')
   })
-   
 })
 
 app.get('/api/persons', (req, res) => {
@@ -58,7 +57,6 @@ app.post('/api/persons', (req, res, next) => {
     res.json(savedPerson)
   }).catch(error => next(error))
 })
-
 
 app.get('/api/persons/:id', (req, res, next) => {
   Person.findById(req.params.id)
@@ -98,6 +96,7 @@ app.put('/api/persons/:id', (req, res, next) => {
 app.use(unknownEndpoint)
 app.use(errorHandler)
 
+// eslint-disable-next-line no-undef
 const PORT = process.env.PORT
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
