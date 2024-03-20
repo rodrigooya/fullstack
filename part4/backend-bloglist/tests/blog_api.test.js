@@ -7,6 +7,7 @@ const Blog = require('../models/blog')
 
 const api = supertest(app)
 
+
 beforeEach(async () => {
   await Blog.deleteMany({})
 
@@ -17,82 +18,120 @@ beforeEach(async () => {
 
 },300000)
 
-test('blogs are returned as json', async () => {
-  await api
-    .get('/api/blogs')
-    .expect(200)
-    .expect('Content-Type', /application\/json/)
+describe('when there is initially some blogs saved', () => {
+  test('blogs are returned as json', async () => {
+    await api
+      .get('/api/blogs')
+      .expect(200)
+      .expect('Content-Type', /application\/json/)
+  })
+
+  test('all blogs are returned', async () => {
+    const response = await api.get('/api/blogs')
+    assert.strictEqual(response.body.length, 6)
+  })
 })
 
-test('there are 6 blogs', async () => {
-  const response = await api.get('/api/blogs')
-
-  assert.strictEqual(response.body.length, 6)
+describe('viewing a specifin blog', () => {
+  test('succeeds with a valid id', async () => {
+    const response = await api.get('/api/blogs')
+    const id = response.body.map(r => r.id)
+    expect(id).toBeDefined()
+  })
 })
 
-test('verifica identificador unico', async () => {
-  const response = await api.get('/api/blogs')
-  const id = response.body.map(r => r.id)
-  expect(id).toBeDefined()
+describe('addittion a new blog', () => {
+  test('succeeds whit valid data', async () => {
+    const newBlog = {
+      title: 'Veamos',
+      author: 'yo',
+      url: 'https://reactpatterns.com/',
+    }
+
+    await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .expect(201)
+      .expect('Content-Type', /application\/json/)
+
+    const response = await api.get('/api/blogs')
+
+    const titles = response.body.map(r => r.title)
+
+    expect(response.body).toHaveLength(helper.initialBlogs.length + 1)
+    expect(titles).toContain(
+      'Veamos'
+    )
+  })
+
+  test('Blog without likes is 0', async () => {
+    const newBlog = {
+      title: 'Veamos',
+      author: 'yo',
+      url: 'https://reactpatterns.com/',
+    }
+
+    await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .expect(201)
+
+    const response = await api.get('/api/blogs')
+    const likes = response.body.map(r => r.likes)
+    expect(likes).toContain(
+      0
+    )
+  })
+
+  test('blog without title is not added', async () => {
+    const newBlog = {
+      author: 'yo',
+      url: 'https://reactpatterns.com/',
+    }
+    await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .expect(400)
+
+    const response = await api.get('/api/blogs')
+    assert.strictEqual(response.body.length, helper.initialBlogs.length)
+  })
 })
 
-test('a valid blog can be added', async () => {
-  const newBlog = {
-    title: 'Veamos',
-    author: 'yo',
-    url: 'https://reactpatterns.com/',
-  }
+describe('deletion of a blog', () => {
+  test('succeeds with status code 204 if id is valid', async () => {
+    const blogsAtStart = await helper.blogsInDb()
+    const blogToDelete = blogsAtStart[0]
 
-  await api
-    .post('/api/blogs')
-    .send(newBlog)
-    .expect(201)
-    .expect('Content-Type', /application\/json/)
+    await api
+      .delete(`/api/blogs/${blogToDelete.id}`)
+      .expect(204)
 
-  const response = await api.get('/api/blogs')
+    const blogsAtEnd = await helper.blogsInDb()
 
-  const titles = response.body.map(r => r.title)
+    assert.strictEqual(blogsAtEnd.length, helper.initialBlogs.length - 1)
 
-  expect(response.body).toHaveLength(helper.initialBlogs.length + 1)
-  expect(titles).toContain(
-    'Veamos'
-  )
+    const titles = blogsAtEnd.map(r => r.title)
+    assert(!titles.includes(blogToDelete.title))
+  })
 })
 
-test('Blog without likes is 0', async () => {
-  const newBlog = {
-    title: 'Veamos',
-    author: 'yo',
-    url: 'https://reactpatterns.com/',
-  }
+describe('update likes of a blog', () => {
+  test('succeeds with status code 204 if id is valid', async () => {
+    const blogsAtStart = await helper.blogsInDb()
+    const blogToUpdate = blogsAtStart[0]
 
-  await api
-    .post('/api/blogs')
-    .send(newBlog)
-    .expect(201)
+    await api
+      .put(`/api/blogs/${blogToUpdate.id}`)
 
-  const response = await api.get('/api/blogs')
-  const likes = response.body.map(r => r.likes)
-  expect(likes).toContain(
-    0
-  )
+    const blogsAtEnd = await helper.blogsInDb()
+
+    assert.strictEqual(blogsAtEnd.length, helper.initialBlogs.length)
+
+    const likes = blogsAtEnd.map(r => r.likes)
+    assert(!likes.includes(blogToUpdate.likes +1))
+  })
 })
-
-test('blog without title is not added', async () => {
-  const newBlog = {
-    author: 'yo',
-    url: 'https://reactpatterns.com/',
-  }
-  await api
-    .post('/api/blogs')
-    .send(newBlog)
-    .expect(400)
-
-  const response = await api.get('/api/blogs')
-
-  assert.strictEqual(response.body.length, helper.initialBlogs.length)
-})
-
 
 afterAll(() => {
   mongoose.connection.close()

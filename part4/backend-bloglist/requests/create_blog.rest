@@ -1,8 +1,9 @@
-POST http://localhost:3003/api/blogs 
+POST http://localhost:3003/api/blogs
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im1sdXVra2FpIiwiaWQiOiI2NWY5ZmE3OTdlOGNiZjk4ZTM0MzFmMWEiLCJpYXQiOjE3MTA5NjgzOTJ9.Qj7JK9Rf8IucqvBwWOQtnzmRMo_RRn8lKB_Jk9SIs9s
 
 {
-    "title": "title1", 
-    "author": "Rodrigo",
-    "url": "rodrigo.com"
+    "title": "prueba1",
+    "author": "Robert C. Martin",
+    "url": "http://blog.cleancoder.com/uncle-bob/2016/05/01/TypeWars.html"
 }
