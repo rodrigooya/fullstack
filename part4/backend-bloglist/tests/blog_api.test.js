@@ -18,6 +18,8 @@ beforeEach(async () => {
 
 },300000)
 
+const TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im1sdXVra2FpIiwiaWQiOiI2NWY5ZmE3OTdlOGNiZjk4ZTM0MzFmMWEiLCJpYXQiOjE3MTA5NjgzOTJ9.Qj7JK9Rf8IucqvBwWOQtnzmRMo_RRn8lKB_Jk9SIs9s'
+
 describe('when there is initially some blogs saved', () => {
   test('blogs are returned as json', async () => {
     await api
@@ -51,6 +53,7 @@ describe('addittion a new blog', () => {
     await api
       .post('/api/blogs')
       .send(newBlog)
+      .set('Authorization', `Bearer ${TOKEN}`)
       .expect(201)
       .expect('Content-Type', /application\/json/)
 
