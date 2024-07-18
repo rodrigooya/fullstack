@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Form, Button } from 'react-bootstrap'
 
 const Login = ({ doLogin }) => {
   const [username, setUsername] = useState('')
@@ -12,27 +13,32 @@ const Login = ({ doLogin }) => {
   }
 
   return (
-    <form onSubmit={handleLogin}>
-      <label>
-        Username:
-        <input
-          type="text"
-          data-testid="username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-        />
-      </label>
-      <label>
-        Password:
-        <input
-          type="password"
-          value={password}
-          data-testid="password"
-          onChange={(e) => setPassword(e.target.value)}
-        />
-      </label>
-      <input type="submit" value="Login" />
-    </form>
+    <div>
+      <h2>login</h2>
+      <Form onSubmit={handleLogin}>
+        <Form.Group>
+          <Form.Label>username:</Form.Label>
+          <Form.Control
+            type="text"
+            data-testid="username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+          />
+        </Form.Group>
+        <Form.Group>
+          <Form.Label>password:</Form.Label>
+          <Form.Control
+            type="password"
+            value={password}
+            data-testid="password"
+            onChange={(e) => setPassword(e.target.value)}
+          />
+        </Form.Group>
+        <Button variant="primary" type="submit">
+          login
+        </Button>
+      </Form>
+    </div>
   )
 }
 

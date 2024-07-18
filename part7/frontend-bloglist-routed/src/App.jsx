@@ -8,7 +8,13 @@ import PropTypes from 'prop-types'
 import NewBlog from './components/NewBlog'
 import Notification from './components/Notification'
 import Togglable from './components/Togglable'
-import { getBlogs, updateBlog, deleteBlog, getUsers } from './requests'
+import {
+  getBlogs,
+  updateBlog,
+  deleteBlog,
+  getUsers,
+  createComment,
+} from './requests'
 import {
   Routes,
   Route,
@@ -17,7 +23,7 @@ import {
   useParams,
   useNavigate,
 } from 'react-router-dom'
-import { Table, Navbar, Nav } from 'react-bootstrap'
+import { Table, Navbar, Nav, Form, Button } from 'react-bootstrap'
 
 const Menu = ({
   blogs,
@@ -29,6 +35,7 @@ const Menu = ({
   handleLogin,
   handleVote,
   handleDelete,
+  handleComment,
 }) => {
   const padding = {
     paddingRight: 5,
@@ -75,6 +82,7 @@ const Menu = ({
               blog={blog}
               handleVote={handleVote}
               handleDelete={handleDelete}
+              handleComment={handleComment}
             />
           }
         />
@@ -113,7 +121,7 @@ const BlogList = ({ blogs }) => {
   )
 }
 
-const Blog = ({ blog, handleVote, handleDelete }) => {
+const Blog = ({ blog, handleVote, handleDelete, handleComment }) => {
   const nameOfUser = blog.user ? blog.user.name : 'anonymous'
 
   const style = {
@@ -137,14 +145,37 @@ const Blog = ({ blog, handleVote, handleDelete }) => {
         <strong>
           {' '}
           {blog.likes} likes
-          <button style={{ marginLeft: 3 }} onClick={() => handleVote(blog)}>
+          <Button
+            variant="primary"
+            style={{ marginLeft: 3 }}
+            onClick={() => handleVote(blog)}
+          >
             like
-          </button>
+          </Button>
         </strong>
       </div>
       <div>
         <strong> added by {blog.user.name} </strong>
       </div>
+      <strong> Comments </strong>
+      <Form onSubmit={handleComment}>
+        <Form.Group>
+          <Form.Label>comment:</Form.Label>
+          <Form.Control type="text" data-testid="comment" name="comment" />
+        </Form.Group>
+        <Button variant="primary" type="submit">
+          add Comment
+        </Button>
+      </Form>
+      <Table striped>
+        <tbody>
+          {blog.comments.map((comments) => (
+            <tr key={comments._id}>
+              <td>{comments.comment}</td>
+            </tr>
+          ))}
+        </tbody>
+      </Table>
       <div>{nameOfUser}</div>
       {canRemove && <button onClick={() => handleDelete(blog)}>remove</button>}
     </div>
@@ -165,16 +196,18 @@ Blog.propTypes = {
 const UserList = ({ users }) => (
   <div>
     <h2>Users</h2>
-    <ul>
-      {users.map((user) => (
-        <li key={user.id}>
-          <div>
-            <Link to={`/users/${user.id}`}>{user.name}</Link>
-            <strong> {user.blogs.length} </strong>
-          </div>
-        </li>
-      ))}
-    </ul>
+    <Table striped>
+      <tbody>
+        {users.map((user) => (
+          <tr key={user.id}>
+            <td>
+              <Link to={`/users/${user.id}`}>{user.name}</Link>
+            </td>
+            <td>{user.blogs.length}</td>
+          </tr>
+        ))}
+      </tbody>
+    </Table>
   </div>
 )
 
@@ -183,17 +216,24 @@ const User = ({ user, blogs }) => {
     <div>
       <h1>{user.name}</h1>
       <h2>added blogs</h2>
-      <ul>
-        {blogs.sort(byLikes).map((blog) => {
-          if (blog.user.name === user.name)
-            return <li key={blog.id}>{blog.title}</li>
-        })}
-      </ul>
+      <Table striped>
+        <tbody>
+          {blogs.sort(byLikes).map((blog) => {
+            if (blog.user.name === user.name)
+              return (
+                <tr key={blog.id}>
+                  <td>{blog.title}</td>
+                </tr>
+              )
+          })}
+        </tbody>
+      </Table>
     </div>
   )
 }
 
 const App = () => {
+  const navigate = useNavigate()
   const result = useQuery({
     queryKey: ['blogs'],
     queryFn: getBlogs,
@@ -210,8 +250,21 @@ const App = () => {
   const notifyWith = useNotify()
   const [user, setUser] = useState(null)
 
-  const match = useMatch('/blogs/:id')
+  const users = resultuser.data
+  const blogs = result.data
+
   const matchu = useMatch('/users/:id')
+  const match = useMatch('/blogs/:id')
+
+  const newCommentMutation = useMutation({
+    mutationFn: createComment,
+    onSuccess: (comment) => {
+      queryClient.invalidateQueries({ queryKey: ['blogs'] })
+    },
+    onError: (error) => {
+      notifyWith(`'${error.response.data.error}' `)
+    },
+  })
 
   const updateBlogMutation = useMutation({
     mutationFn: updateBlog,
@@ -261,7 +314,6 @@ const App = () => {
   }
 
   const handleVote = (blog) => {
-    console.log('updating', blog)
     updateBlogMutation.mutate({ ...blog, likes: blog.likes + 1 })
   }
 
@@ -269,16 +321,21 @@ const App = () => {
     if (window.confirm(`Remove blog ${blog.title} by ${blog.author}`)) {
       notifyWith(`Blog ${blog.title}, by ${blog.author} removed`)
       deleteBlogMutation.mutate({ ...blog, id: blog.id })
+      navigate('/')
     }
   }
 
-  const users = resultuser.data
-  const blogs = result.data
-
-  const blog = match ? blogs.find((blog) => blog.id === match.params.id) : null
+  const handleComment = (event) => {
+    event.preventDefault()
+    const comment = event.target.comment.value
+    event.target.comment.value = ''
+    newCommentMutation.mutate({ ...blog, id: blog.id, comment })
+  }
   const userblog = matchu
     ? users.find((user) => user.id === matchu.params.id)
     : null
+
+  const blog = match ? blogs.find((blog) => blog.id === match.params.id) : null
 
   if (!user) {
     return (
@@ -302,6 +359,7 @@ const App = () => {
         handleVote={handleVote}
         handleDelete={handleDelete}
         handleLogin={handleLogin}
+        handleComment={handleComment}
       />
     </div>
   )

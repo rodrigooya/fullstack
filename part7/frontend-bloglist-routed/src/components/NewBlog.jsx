@@ -2,6 +2,7 @@ import { useNotify } from '../NotificationContext'
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { createBlog } from '../requests'
 import { createRef } from 'react'
+import { Form, Button } from 'react-bootstrap'
 
 const NewBlog = () => {
   const queryClient = useQueryClient()
@@ -35,21 +36,23 @@ const NewBlog = () => {
   return (
     <div>
       <h2>Create a New Blog</h2>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>Title:</label>
-          <input type="text" data-testid="title" name="title" />
-        </div>
-        <div>
-          <label>URL:</label>
-          <input type="text" data-testid="url" name="url" />
-        </div>
-        <div>
-          <label>Author:</label>
-          <input type="text" data-testid="author" name="author" />
-        </div>
-        <button type="submit">Create</button>
-      </form>
+      <Form onSubmit={handleSubmit}>
+        <Form.Group>
+          <Form.Label>Title:</Form.Label>
+          <Form.Control type="text" data-testid="title" name="title" />
+        </Form.Group>
+        <Form.Group>
+          <Form.Label>Author:</Form.Label>
+          <Form.Control type="text" data-testid="author" name="author" />
+        </Form.Group>
+        <Form.Group>
+          <Form.Label>Url:</Form.Label>
+          <Form.Control type="text" data-testid="url" name="url" />
+        </Form.Group>
+        <Button variant="primary" type="submit">
+          Create
+        </Button>
+      </Form>
     </div>
   )
 }

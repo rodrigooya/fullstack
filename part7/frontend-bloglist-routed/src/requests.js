@@ -13,6 +13,11 @@ export const getBlogs = () => axios.get(baseUrl).then((res) => res.data)
 export const createBlog = (newBlog) =>
   axios.post(baseUrl, newBlog, getConfit()).then((res) => res.data)
 
+export const createComment = (newComment) =>
+  axios
+    .post(`${baseUrl}/${newComment.id}/comments`, newComment)
+    .then((res) => res.data)
+
 export const updateBlog = (updatedBlog) =>
   axios
     .put(`${baseUrl}/${updatedBlog.id}`, updatedBlog, getConfit())
