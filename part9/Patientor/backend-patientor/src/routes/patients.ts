@@ -7,6 +7,15 @@ router.get("/", (_req, res) => {
   res.send(patientService.getNonSensitiveEntries());
 });
 
+router.get("/:id", (req, res) => {
+  const entry = patientService.findById(String(req.params.id));
+
+  if (entry) {
+    res.send(entry);
+  } else {
+    res.sendStatus(404);
+  }
+});
 router.post("/", (req, res) => {
   try {
     const newPatient = toNewPatient(req.body);
