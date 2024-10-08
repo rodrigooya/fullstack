@@ -1,0 +1,16 @@
+POST  http://localhost:3001/api/patients/70610b30-85a9-11ef-882c-23d26b068c8e/entries
+Content-Type: application/json
+
+{
+    "date": "2024-09-13",
+    "specialist": "MD Rodrigo",
+    "type": "OccupationalHealthcare",
+   "description":"veamos que pasa.",
+   "diagnosisCodes":"M24.2",
+   "employerName":"Rodrigofc",
+    "sickLeave": {
+      "startDate": "2024-09-13",
+    "endDate": "2024-09-13"
+  }
+    
+}
